@@ -13,9 +13,9 @@ class ToF:
     def __init__ (self,str) :
         self.t,self.n = self.read(str)
         h = mcstasHeader(str)
-        self.xmin  = int([x for x in h if x[0].strip(':') == 'xlimits'][0][1])
-        self.xmax  = int([x for x in h if x[0].strip(':') == 'xlimits'][0][2])
-        self.Ncount = int([x for x in h if x[0].strip(':') == 'Ncount'][0][1])
+        self.Ncount = int(float([x for x in h if x[0].strip(':') == 'Ncount'][0][1]))
+        self.xmin  = float([x for x in h if x[0].strip(':') == 'xlimits'][0][1])
+        self.xmax  = float([x for x in h if x[0].strip(':') == 'xlimits'][0][2])
         
     def read(self,str) :
         d,n = np.loadtxt(str,usecols=(0,3),unpack=True)
@@ -23,7 +23,7 @@ class ToF:
     
     # Hack
     def randomize(self,val) :
-        self.n = np.random.randint(low=self.xmin,high=self.xmax,size=val)
+        self.n = np.random.random(size=val)*(self.xmax-self.xmin)+self.xmin
 
 
 ##########################
@@ -32,7 +32,7 @@ class D2:
     def __init__ (self,str) :
         self.n = self.read(str)
         self.h = mcstasHeader(str)
-        self.Ncount = int([x for x in self.h if x[0].strip(':') == 'Ncount'][0][1])
+        self.Ncount = int(float([x for x in self.h if x[0].strip(':') == 'Ncount'][0][1]))
 
     def read(self,str) :
         d = np.loadtxt(str,unpack=True)
