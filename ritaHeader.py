@@ -18,8 +18,8 @@ def header(pid=1234,st=time.time(),ts=np.random.randint(3200000000),ne=0):
     return json.dumps(h)
     
 
-def control():
-    with open("control.in") as i:
+def control(str):
+    with open(str) as i:
         ctl = json.load(i)
     i.close()
     return ctl

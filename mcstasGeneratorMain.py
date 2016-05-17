@@ -1,26 +1,37 @@
-from nexus2event import *
-from neventarray import *
+#from neventarray import *
 
 import sys, os, getopt
 import errno
-import numpy
-import time
-import binascii
-
-import zmq
+import numpy as np
 
 from detector import ToF
 from detector import D2
 
 from instrument import Rita2
 
-import ritaHeader as rh
+from ritaHeader import control
 
 from zmqGenerator import generatorSource
 
+def usage() :
+    print '\nUsage:'
+    print '\tpython mcstasGeneratorMain.py -a <area detector file(s)> -t <tof detector file(s)> port [multiplier]\n'
+    print '\tpython mcstasGeneratorMain.py -h'
+    print ''
+    print '-a,--area :\tfile (or list of,comma separated) containing area detector mcstas output'
+    print '-t,--tof :\tfile (or list of,comma separated) containing tof mcstas output'
+    print 'port :\tTCP port on which 0MQ will stream data'
+    print 'multiplier :\tincrease data size using <multiplier> identical copies in the same blob (optional, default = 1)'
+    print '-h,--help :\tthis help'
+
+
+
 def main(argv,t,surf):
 
-    print argv
+    if len(argv) < 1:
+        usage()
+        exit(-1)
+        
     port = argv[0]
 
     multiplier = 1
@@ -30,9 +41,12 @@ def main(argv,t,surf):
     g = generatorSource(port,multiplier)
     detector = Rita2(t[0],surf[0])
 
-    print t[0].n.count
-    #    stream = detector.mcstas2stream(np.array([2, 1, 1, 1, 1]))
-#    g.run(stream)
+    ctl = control('control.in')
+    flags = np.array([ctl['evt'],ctl['bsy'],ctl['cnt'],ctl['rok'],ctl['gat']])
+
+    stream = detector.mcstas2stream(flags)
+    print stream.shape
+    g.run(stream,'control.in')
 
 
     
@@ -44,10 +58,6 @@ if __name__ == "__main__":
         usage()
         sys.exit(2)
         
-#    if len(args) < 4:
-#        usage()
-#        exit(-1)
-        
     for o,arg in opts:
         if o in ("-h","--help"):
             usage()
@@ -58,7 +68,11 @@ if __name__ == "__main__":
         if o in ("-a","--area"):
             all_arguments = arg.split(',')
             surf = [D2(s) for s in all_arguments]
+    
+    t[0].randomize(surf[0].count())
 
-    print t[0].n.size
+
     main(args,t,surf)
+
+
 

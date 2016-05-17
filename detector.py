@@ -6,10 +6,9 @@ def mcstasHeader(str):
     reader = csv.reader(open(str,"r"), delimiter=' ')
     return [row[1:] for row in reader if re.match('#', row[0], re.IGNORECASE)]
     
-event_t = np.dtype([("ts",np.uint32),
-                    ("data",np.uint32)])
 
-
+##########################
+# ToF detector    
 class ToF:
     def __init__ (self,str) :
         self.t,self.n = self.read(str)
@@ -25,7 +24,10 @@ class ToF:
     # Hack
     def randomize(self,val) :
         self.n = np.random.randint(low=self.xmin,high=self.xmax,size=val)
-    
+
+
+##########################
+# 2-D detector    
 class D2:
     def __init__ (self,str) :
         self.n = self.read(str)
@@ -35,8 +37,15 @@ class D2:
     def read(self,str) :
         d = np.loadtxt(str,unpack=True)
         x,y = d.shape
-        return d[:x,(y/3*2):]
+#        return d[:x,:y/3]
+        return d[:x,2*y/3:]
 
     def count(self):
         return sum(sum(self.n))
 
+
+
+##########################
+# N-D detector (TODO)
+#class ND:
+#    def __init__(self):

@@ -1,7 +1,5 @@
-from nexus2event import *
-from neventarray import *
+#from neventarray import *
 
-import sys, os, getopt
 import errno
 import numpy
 import time
@@ -50,23 +48,24 @@ class generatorSource:
         return o
 
     
-    def run(self,data,header):
+    def run(self,data,control_str):
 
+        ctl = rh.control(control_str)
         ctime=time.time()
         pulseID=0
 
         s = 1e-6*(data.nbytes+len(rh.header(pulseID,ctime,12345678,data.shape[0])))
-        s = 0
         print "size = ",s, "MB; expected bw = ",s * ctl["rate"], "MB/s"
 
         while(ctl["run"] != "stop"):
+
             stream_frequency = 1./ctl["rate"]
 
             itime = time.time()
             if ctl["run"] != "pause":
-                dataHeader = header(pulseID,itime,12345678,data.shape[0])
+                dataHeader = rh.header(pulseID,itime,12345678,data.shape[0])
             else:
-                dataHeader='k' #rh.header(pulseID,itime,12345678,0)
+                dataHeader = rh.header(pulseID,itime,12345678,0)
 
             def send_data(socket,head):
                 if ctl["run"] == "run": 
@@ -87,10 +86,9 @@ class generatorSource:
                 time.sleep (remaining)
 
             pulseID += 1
-            ctl = {''}#rh.control()
+            ctl = rh.control(control_str)
             if time.time()-ctime > 10 :
-                size = (data.size*data.dtype.itemsize+
-                        sys.getsizeof(dataHeader))
+                size = (data.nbytes+len(dataHeader))
 
                 print "Sent ",self.count," events @ ",size*self.count/(10.*1e6)," MB/s"
                 self.count = 0
