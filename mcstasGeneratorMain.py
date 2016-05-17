@@ -45,7 +45,6 @@ def main(argv,t,surf):
     flags = np.array([ctl['evt'],ctl['bsy'],ctl['cnt'],ctl['rok'],ctl['gat']])
 
     stream = detector.mcstas2stream(flags)
-    print stream.shape
     g.run(stream,'control.in')
 
 
