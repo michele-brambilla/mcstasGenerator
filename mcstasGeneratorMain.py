@@ -35,8 +35,8 @@ def main(argv,t,surf):
     port = argv[0]
 
     multiplier = 1
-    if len(argv) > 2:
-        multiplier = argv[2]
+    if len(argv) > 1:
+        multiplier = argv[1]
 
     g = generatorSource(port,multiplier)
     detector = Rita2(t[0],surf[0])
@@ -44,7 +44,9 @@ def main(argv,t,surf):
     ctl = control('control.in')
     flags = np.array([ctl['evt'],ctl['bsy'],ctl['cnt'],ctl['rok'],ctl['gat']])
 
+    detector.arrangeToF()
     stream = detector.mcstas2stream(flags)
+    
     g.run(stream,'control.in')
 
 
@@ -68,9 +70,6 @@ if __name__ == "__main__":
             all_arguments = arg.split(',')
             surf = [D2(s) for s in all_arguments]
     
-    t[0].randomize(surf[0].count())
-
-
     main(args,t,surf)
 
 

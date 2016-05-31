@@ -1,7 +1,7 @@
 #from neventarray import *
 
 import errno
-import numpy
+import numpy as np
 import time
 import binascii
 
@@ -15,6 +15,7 @@ class generatorSource:
         self.port = port
         self.context = zmq.Context()
         self.socket = self.connect()
+        self.multiplier = multiplier
         self.count = 0
 
     def connect(self):
@@ -49,6 +50,9 @@ class generatorSource:
 
     
     def run(self,data,control_str):
+
+        if self.multiplier > 1:
+            data = np.tile(data,float(self.multiplier))
 
         ctl = rh.control(control_str)
         ctime=time.time()
